@@ -181,10 +181,10 @@
                                         <div class="product-img">
                                             <a href="shop.html">
                                                 <img class="primary-img"
-                                                     src="~/assets/images/website-images//@product.ImageURL"
+                                                     src="~/assets/images/website-images//@product.ProductImages.FirstOrDefault(pi=>pi.IsPrimary==true).ImageURL"    
                                                      alt="Product Images" />
                                                 <img class="secondary-img"
-                                                     src="~/assets/images/website-images//1-8-270x300.jpg"
+                                                     src="~/assets/images/website-images//@product.ProductImages.FirstOrDefault(pi=>pi.IsPrimary==false).ImageURL"
                                                      alt="Product Images" />
                                             </a>
                                             <div class="product-add-action">
@@ -259,7 +259,7 @@
                                         <div class="product-img">
                                             <a href="shop.html">
                                                 <img class="primary-img"
-                                                     src="~/assets/images/website-images//@product.ImageURL"
+                                                     src="~/assets/images/website-images//@product.ProductImages.FirstOrDefault(p=>p.IsPrimary == true).ImageURL"
                                                      alt="Product Images" />
                                                 <img class="secondary-img"
                                                      src="~/assets/images/website-images//1-8-270x300.jpg"
@@ -337,7 +337,7 @@
                                         <div class="product-img">
                                             <a href="shop.html">
                                                 <img class="primary-img"
-                                                     src="~/assets/images/website-images//@product.ImageURL"
+                                                     src="~/assets/images/website-images//@product.ProductImages.FirstOrDefault(p=>p.IsPrimary == true).ImageURL"
                                                      alt="Product Images" />
                                                 <img class="secondary-img"
                                                      src="~/assets/images/website-images//1-8-270x300.jpg"
