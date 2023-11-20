@@ -22,6 +22,7 @@ namespace ProniaTask.Controllers
                 .Include(p => p.Category)
                 .Include(p=>p.ProductImages)
                 .Include(p=>p.ProductTags).ThenInclude(p=>p.Tag)
+                .Include(p=>p.ProductColors).ThenInclude(p=>p.Color)
                 .FirstOrDefault(p => p.Id == id);
 
             if (product is null) return NotFound();
