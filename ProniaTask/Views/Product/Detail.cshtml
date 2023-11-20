@@ -1,6 +1,4 @@
-﻿@using ProniaTask.Models;
-@using ProniaTask.DetailViewModel;
-
+﻿
 @model DetailVM
 <!-- Begin Main Content Area  -->
 <main class="main-content">
@@ -32,7 +30,7 @@
                                 @foreach (ProductImage pi in Model.Product.ProductImages.OrderByDescending(p=>p.IsPrimary))
                                 {
                                     <div class="swiper-slide">
-                                        <a href="~/assets/images/website-images/@pi.ImageURL"
+                                        <a  asp-controller="Product" asp-action="Detail" asp-route-id="@pi.Product.Id"
                                            class="single-img gallery-popup">
                                             <img class="img-full"
                                                  src="~/assets/images/website-images/@pi.ImageURL"
@@ -47,7 +45,7 @@
                                 <div class="swiper-wrapper">
                                     @foreach (ProductImage pi in Model.Product.ProductImages)
                                     {
-                                        <a href="#" class="swiper-slide">
+                                        <a asp-controller="Product" asp-action="Detail" asp-route-id="@pi.Product.Id" class="swiper-slide">
                                             <img class="img-full"
                                                  src="~/assets/images/website-images/@pi.ImageURL"
                                                  alt="Product Thumnail" />
@@ -464,7 +462,7 @@
                             {
                                 <div class="swiper-slide product-item">
                                     <div class="product-img">
-                                        <a href="single-product-variable.html">
+                                        <a asp-controller="Product" asp-action="Detail" asp-route-id="@product.Id">
                                             <img class="primary-img"
                                                  src="~/assets/images/website-images/@product.ProductImages.FirstOrDefault(p=>p.IsPrimary==true).ImageURL"
                                                  alt="Product Images" />
@@ -514,7 +512,7 @@
                                     </div>
                                     <div class="product-content">
                                         <a class="product-name"
-                                           href="single-product-variable.html">@product.Name</a>
+                                           asp-controller="Product" asp-action="Detail" asp-route-id="@product.Id">@product.Name</a>
                                         <div class="price-box pb-1">
                                             <span class="new-price">$@product.Price</span>
                                         </div>
