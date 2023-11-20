@@ -18,10 +18,18 @@ namespace ProniaTask.Controllers
         {
             if (id <= 0) return BadRequest();
 
-            Product product = _context.Products.Include(p => p.Category).Include(p=>p.ProductImages).FirstOrDefault(p => p.Id == id);
+            Product product = _context.Products
+                .Include(p => p.Category)
+                .Include(p=>p.ProductImages)
+                .FirstOrDefault(p => p.Id == id);
+
             if (product is null) return NotFound();
 
-            List<Product> products = _context.Products.Include(p => p.Category).Include(p => p.ProductImages).Where(p => p.CategoryId == product.CategoryId && p.Id!=product.Id).ToList();
+            List<Product> products = _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.ProductImages.Where(pi=>pi.IsPrimary!=null))
+                .Where(p => p.CategoryId == product.CategoryId && p.Id!=product.Id)
+                .ToList();
 
 
             DetailVM detailVM = new() { Product = product, RelatedProducts = products };
