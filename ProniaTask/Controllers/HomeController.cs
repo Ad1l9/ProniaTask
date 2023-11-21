@@ -15,13 +15,13 @@ namespace ProniaTask.Controllers
             this._context = context;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
 
-            List<Product> featured = _context.Products.Include(p=>p.ProductImages).OrderBy(p => p.SellCount).ToList();
-            List<Product> products = _context.Products.Include(p=>p.ProductImages).ToList();
-            List<Product> bestseller = _context.Products.Include(p => p.ProductImages).OrderByDescending(p=>p.SellCount).ToList();
-            List<Product> latest = _context.Products.Include(p => p.ProductImages).OrderByDescending(p=>p.Id).ToList();
+            List<Product> featured =await  _context.Products.Include(p=>p.ProductImages).OrderBy(p => p.SellCount).ToListAsync();
+            List<Product> products =await _context.Products.Include(p=>p.ProductImages).ToListAsync();
+            List<Product> bestseller =await _context.Products.Include(p => p.ProductImages).OrderByDescending(p=>p.SellCount).ToListAsync();
+            List<Product> latest =await _context.Products.Include(p => p.ProductImages).OrderByDescending(p=>p.Id).ToListAsync();
 
             HomeVM vm = new() { Featured=featured,Bestseller=bestseller,Latest=latest, Products=products };
 
