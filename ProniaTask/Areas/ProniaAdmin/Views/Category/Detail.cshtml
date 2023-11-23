@@ -1,0 +1,15 @@
+﻿@model Category
+
+<div class="card" style="width: 18rem;">
+  <div class="card-body">
+    <h5 class="card-title">@Model.Name</h5>
+    <h6 class="card-subtitle mb-2 text-body-secondary">Product Category</h6>
+    <p class="card-text">Products: </p>
+	@foreach (Product product in Model.Products)
+		{
+			<p class="card-text">@product.Name</p>
+		}
+    <a asp-action="Index" asp-controller="Category" class="card-link">All Categories</a>
+    <a asp-action="Update" asp-controller="Category" asp-route-id="@Model.Id" class="btn btn-warning btn-info"> <i class="mdi mdi-pencil"></i> Update</a>
+  </div>
+</div>
