@@ -1,4 +1,4 @@
-﻿@model List<Slide>
+﻿@model List<Color>
 @{
     int count = 0;
 }
@@ -7,8 +7,8 @@
         <div class="col-lg-12 grid-margin stretch-card">
             <div class="card">
                 <div class="card-body">
-                    <h4 class="card-title">Slides</h4>
-                    <a class="btn btn-success btn-info" asp-controller="Slide" asp-action="Create">Create Slide</a>
+                    <h4 class="card-title">Colors</h4>
+                    <a class="btn btn-success btn-info" asp-controller="Color" asp-action="Create">Create Color</a>
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
@@ -17,13 +17,10 @@
                                         #
                                     </th>
                                     <th>
-                                        Image
+                                        Name
                                     </th>
                                     <th>
-                                        Title
-                                    </th>
-                                    <th>
-                                        Order
+                                        Products Count
                                     </th>
                                     <th>
                                         Settings
@@ -31,7 +28,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (Slide slide in Model)
+                                @foreach (Color color in Model)
                                 {
                                     count++;
                                     <tr>
@@ -39,24 +36,18 @@
                                             @count
                                         </td>
                                         <td>
-                                            <img style="width:150px; height:150px;" src="~/assets/images/website-images//@slide.ImageUrl" />
+                                            @color.Name
                                         </td>
                                         <td>
-                                           @slide.Title
+                                            @color.ProductColors.Count
                                         </td>
                                         <td>
-                                            @slide.Order
-                                        </td>
-                                        <td>
-                                            <a asp-action="Update" asp-route-id="@slide.Id" class="btn btn-warning btn-info"> <i class="mdi mdi-pencil"></i> Update</a>
-                                            <a asp-action="Delete" asp-route-id="@slide.Id" class="btn btn-danger btn-info"> <i class="mdi mdi-delete"></i> Delete</a>
-                                            <a asp-action="Details" asp-route-id="@slide.Id" class="btn btn-primary btn-info"> <i class="mdi mdi-open-in-new"></i> Details</a>
+                                            <a asp-action="Update" asp-route-id="@color.Id" class="btn btn-warning btn-info"> <i class="mdi mdi-pencil"></i> Update</a>
+                                            <a asp-action="Delete" asp-route-id="@color.Id" class="btn btn-danger btn-info"> <i class="mdi mdi-delete"></i> Delete</a>
+                                            <a asp-action="Details" asp-route-id="@color.Id" class="btn btn-primary btn-info"> <i class="mdi mdi-open-in-new"></i> Details</a>
                                         </td>
                                     </tr>
-
-
                                 }
-
                             </tbody>
                         </table>
                     </div>
