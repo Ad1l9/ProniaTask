@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using ProniaTask.Models;
 using ProniaTask.DAL;
+using ProniaTask.Areas.ProniaAdmin.ViewModels;
 
 namespace ProniaTask.Areas.ProniaAdmin.Controllers
 {
@@ -25,18 +26,20 @@ namespace ProniaTask.Areas.ProniaAdmin.Controllers
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> Create(Size size)
+        public async Task<IActionResult> Create(CreateUpdateSizeVM sizeVM)
         {
             if (!ModelState.IsValid)
             {
                 return View();
             }
-            bool result = _context.Sizes.Any(c => c.Name.ToLower().Trim() == size.Name.ToLower().Trim());
+            bool result = _context.Sizes.Any(c => c.Name.ToLower().Trim() == sizeVM.Name.ToLower().Trim());
             if (result)
             {
                 ModelState.AddModelError("Name", "This size already exists");
                 return View();
             }
+            Size size = new() { Name = sizeVM.Name ,Value=sizeVM.Name};
+
             await _context.Sizes.AddAsync(size);
             await _context.SaveChangesAsync();
             return RedirectToAction("Index");

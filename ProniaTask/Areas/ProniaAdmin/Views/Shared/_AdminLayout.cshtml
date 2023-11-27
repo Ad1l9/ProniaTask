@@ -199,6 +199,7 @@
               <ul class="nav flex-column sub-menu">
                 <li class="nav-item"> <a asp-action="Create" asp-controller="Tag" class="nav-link">Create Tag</a></li>
                 <li class="nav-item"> <a asp-action="Create" asp-controller="Category" class="nav-link">Create Category</a></li>
+                <li class="nav-item"> <a asp-action="Create" asp-controller="Product" class="nav-link">Create Product</a></li>
               </ul>
             </div>
           </li>
@@ -215,15 +216,15 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="pages/tables/basic-table.html">
-              <i class="mdi mdi-grid-large menu-icon"></i>
-              <span class="menu-title">Tables</span>
+            <a asp-controller="Product" asp-action="Index" class="nav-link">
+              <i class="mdi mdi-view-headline menu-icon"></i>
+              <span class="menu-title">Products</span>
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="pages/icons/mdi.html">
-              <i class="mdi mdi-emoticon menu-icon"></i>
-              <span class="menu-title">Icons</span>
+            <a asp-controller="Colors" asp-action="Index" class="nav-link">
+              <i class="mdi mdi-view-headline menu-icon"></i>
+              <span class="menu-title">Colors</span>
             </a>
           </li>
           <li class="nav-item">

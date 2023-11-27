@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ProniaTask.Areas.ProniaAdmin.ViewModels;
 using ProniaTask.DAL;
 using ProniaTask.Models;
 
@@ -52,20 +53,20 @@ namespace ProniaTask.Areas.ProniaAdmin.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Update(int id, Color color)
+        public async Task<IActionResult> Update(int id,UpdateCreateColorVM colorVM)
         {
             if (!ModelState.IsValid) return View();
 
             Color existed = await _context.Colors.FirstOrDefaultAsync(c => c.Id == id);
             if (existed is null) return NotFound();
-            bool result = _context.Colors.Any(c => c.Name == color.Name && c.Id != id);
+            bool result = _context.Colors.Any(c => c.Name == colorVM.Name && c.Id != id);
             if (result)
             {
                 ModelState.AddModelError("Name", "Bu reng artiq movcuddur");
                 return View();
             }
 
-            existed.Name = color.Name;
+            existed.Name = colorVM.Name;
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }

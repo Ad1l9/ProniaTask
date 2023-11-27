@@ -1,5 +1,5 @@
 ﻿
-@model Slide
+@model UpdateSlideVM
 
 <div class="content-wrapper">
 	<div class="row">
@@ -9,6 +9,7 @@
 					<form class="forms-sample" method="post" enctype="multipart/form-data">
 						<div class="form-group">
 							<img src="~/assets/images/website-images/@Model.ImageUrl" />
+							<input asp-for="ImageUrl" class="form-control">
 						</div>
 						<div class="form-group">
 							<label asp-for="Photo">Choose new photo</label>

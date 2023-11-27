@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Pronia.Utilities.Extentions;
+using ProniaTask.Areas.ProniaAdmin.ViewModels;
 using ProniaTask.DAL;
+
 using ProniaTask.Models;
 
 namespace ProniaTask.Areas.ProniaAdmin.Controllers
@@ -28,27 +30,36 @@ namespace ProniaTask.Areas.ProniaAdmin.Controllers
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> Create(Slide slide)
+        public async Task<IActionResult> Create(CreateSlideVM slideVM)
         {
-            if (slide.Photo is null)
+            if (!ModelState.IsValid)
             {
-                ModelState.AddModelError("Photo", "Foto secin");
                 return View();
             }
-            if (!slide.Photo.ValidateType())
+
+            if (!slideVM.Photo.ValidateType())
             {
                 ModelState.AddModelError("Photo", "Yanlis fayl tipi");
                 return View();
             }
-            if (slide.Photo.ValidateSize(2 * 1024))
+            if (!slideVM.Photo.ValidateSize(2 * 1024))
             {
-                ModelState.AddModelError("Photo", "@mb dan cox olmamalidir");
+                ModelState.AddModelError("Photo", "2mb dan cox olmamalidir");
                 return View();
             }
 
+            string fileName= await slideVM.Photo.CreateFile(_env.WebRootPath, "assets", "images", "website-images");
 
-            slide.ImageUrl = await slide.Photo.CreateFile(_env.WebRootPath, "assets", "images", "website-images");
 
+            Slide slide = new()
+            {
+                ImageUrl=fileName,
+                Title=slideVM.Title,
+                Subtitle=slideVM.Subtitle,
+                Description=slideVM.Description,
+                Order=slideVM.Order,
+
+            };
 
             await _context.Slides.AddAsync(slide);
             await _context.SaveChangesAsync();
@@ -82,40 +93,53 @@ namespace ProniaTask.Areas.ProniaAdmin.Controllers
             Slide slide = await _context.Slides.FirstOrDefaultAsync(c => c.Id == id);
             if (slide is null) return NotFound();
 
-            return View(slide);
+            UpdateSlideVM updateSlideVM = new()
+            {
+                ImageUrl = slide.ImageUrl,
+                Title = slide.Title,
+                Subtitle = slide.Subtitle,
+                Order = slide.Order,
+                Description=slide.Description
+            };
+
+            return View(updateSlideVM);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Update(int id, Slide slide)
+        public async Task<IActionResult> Update(int id, UpdateSlideVM updateSlideVM)
         {
+            if (!ModelState.IsValid) return View(updateSlideVM);
+
+
             Slide existed = await _context.Slides.FirstOrDefaultAsync(c => c.Id == id);
             if (existed is null) return NotFound();
-            if (!ModelState.IsValid) return View(existed);
-            bool result = _context.Slides.Any(c => c.Title == slide.Title && c.Order == slide.Order && c.Id != id);
+            
+            
+            bool result = _context.Slides.Any(c => c.Title == updateSlideVM.Title && c.Order == updateSlideVM.Order && c.Id != id);
             if (!result)
             {
-                if (slide.Photo is not null)
+                if (updateSlideVM.Photo is not null)
                 {
-                    if (!slide.Photo.ValidateType())
+                    if (!updateSlideVM.Photo.ValidateType())
                     {
                         ModelState.AddModelError("Photo", "Yanlis fayl tipi");
-                        return View(existed);
+                        return View(updateSlideVM);
                     }
-                    if (slide.Photo.ValidateSize(2 * 1024))
+                    if (!updateSlideVM.Photo.ValidateSize(2 * 1024))
                     {
                         ModelState.AddModelError("Photo", "2mb dan cox olmamalidir");
-                        return View(existed);
+                        return View(updateSlideVM);
                     }
-                    string newImage = await slide.Photo.CreateFile(_env.WebRootPath, "assets", "images", "website-images");
+                    string newImage = await updateSlideVM.Photo.CreateFile(_env.WebRootPath, "assets", "images", "website-images");
                     existed.ImageUrl.DeleteFile(_env.WebRootPath, "assets", "images", "website-images");
                     existed.ImageUrl = newImage;
 
                 }
 
-                existed.Title = slide.Title;
-                existed.Description = slide.Description;
-                existed.Subtitle = slide.Subtitle;
-                existed.Order = slide.Order;
+                existed.Title = updateSlideVM.Title;
+                existed.Description = updateSlideVM.Description;
+                existed.Subtitle = updateSlideVM.Subtitle;
+                existed.Order = updateSlideVM.Order;
                 await _context.SaveChangesAsync();
             }
             else

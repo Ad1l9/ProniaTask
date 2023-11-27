@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ProniaTask.Areas.ProniaAdmin.ViewModels;
 using ProniaTask.DAL;
 using ProniaTask.Models;
 
@@ -70,7 +71,7 @@ namespace ProniaTask.Areas.ProniaAdmin.Controllers
             return View(tag);
         }
         [HttpPost]
-        public async Task<IActionResult> Update(int id, Tag tag)
+        public async Task<IActionResult> Update(int id, UpdateTagVM tagVM)
         {
             if (!ModelState.IsValid)
             {
@@ -80,7 +81,7 @@ namespace ProniaTask.Areas.ProniaAdmin.Controllers
 
             if (existed is null) return NotFound();
 
-            bool isInclude = _context.Tags.Any(c => c.Name == tag.Name && c.Id != id);
+            bool isInclude = _context.Tags.Any(c => c.Name == tagVM.Name && c.Id != id);
 
             if (isInclude)
             {
@@ -88,7 +89,7 @@ namespace ProniaTask.Areas.ProniaAdmin.Controllers
                 return View();
             }
 
-            existed.Name = tag.Name;
+            existed.Name = tagVM.Name;
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
