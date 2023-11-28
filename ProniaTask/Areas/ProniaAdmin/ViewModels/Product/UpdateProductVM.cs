@@ -13,7 +13,6 @@ namespace ProniaTask.Areas.ProniaAdmin.ViewModels
         public string Description { get; set; }
         public int CategoryId { get; set; }
 
-        public Category Category { get; set; }
 
         public List<Category>? Categories { get; set; }
         public List<int> TagIds { get; set; }

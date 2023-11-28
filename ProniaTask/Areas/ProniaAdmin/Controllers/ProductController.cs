@@ -16,15 +16,28 @@ namespace ProniaTask.Areas.ProniaAdmin.Controllers
         }
         public async Task<IActionResult> Index()
         {
-            List<Product> products = await _context.Products.Include(p=>p.Category).Include(p=>p.ProductImages.Where(pi=>pi.IsPrimary==true)).ToListAsync();
+            List<Product> products = await _context.Products
+                .Include(p=>p.Category)
+                .Include(p=>p.ProductTags)
+                .Include(p=>p.ProductTags)
+                .Include(p=>p.ProductSizes)
+                .Include(p=>p.ProductImages
+                .Where(pi=>pi.IsPrimary==true)).ToListAsync();
             return View(products);
         }
 
 
         public async Task<IActionResult> Create()
         {
-            ViewBag.Categories = await _context.Categories.ToListAsync();
-            return View();
+            var vm = new CreateProductVM
+            {
+                Categories = await _context.Categories.ToListAsync(),
+                Tags = await _context.Tags.ToListAsync(),
+                Colors = await _context.Colors.ToListAsync(),
+                Sizes = await _context.Sizes.ToListAsync(),
+            };
+
+            return View(vm);
         }
 
         [HttpPost]
@@ -32,18 +45,64 @@ namespace ProniaTask.Areas.ProniaAdmin.Controllers
         {
             if (!ModelState.IsValid)
             {
-                ViewBag.Categories = await _context.Categories.ToListAsync();
-                return View();
+                productVM.Categories = await _context.Categories.ToListAsync();
+                productVM.Colors = await _context.Colors.ToListAsync();
+                productVM.Sizes = await _context.Sizes.ToListAsync();
+                productVM.Tags = await _context.Tags.ToListAsync();
+                return View(productVM);
             }
 
             bool result = await _context.Categories.AnyAsync(c=>c.Id==productVM.CategoryId);
 
             if (!result)
             {
-                ViewBag.Categories = await _context.Categories.ToListAsync();
+                productVM.Colors = await _context.Colors.ToListAsync();
+                productVM.Sizes = await _context.Sizes.ToListAsync();
+                productVM.Tags = await _context.Tags.ToListAsync();
+                productVM.Categories = await _context.Categories.ToListAsync();
                 ModelState.AddModelError("CategoryId","Bu id-li category movcud deyil");
-                return View();
+                return View(productVM);
             }
+
+            foreach (int id in productVM.TagIds)
+            {
+                bool TagResult = await _context.Tags.AnyAsync(t => t.Id == id);
+                if (!TagResult)
+                {
+                    productVM.Colors = await _context.Colors.ToListAsync();
+                    productVM.Sizes = await _context.Sizes.ToListAsync();
+                    productVM.Categories = await _context.Categories.ToListAsync();
+                    productVM.Tags = await _context.Tags.ToListAsync();
+                    ModelState.AddModelError("TagIds", "Bele tag movcud deyil");
+                    return View(productVM);
+                }
+            }
+            foreach (int id in productVM.ColorIds)
+            {
+                bool colorResult = await _context.Colors.AnyAsync(t => t.Id == id);
+                if (!colorResult)
+                {
+                    productVM.Categories = await _context.Categories.ToListAsync();
+                    productVM.Tags = await _context.Tags.ToListAsync();
+                    productVM.Colors = await _context.Colors.ToListAsync();
+                    ModelState.AddModelError("ColorIds", "Bele color movcud deyil");
+                    return View(productVM);
+                }
+            }
+            foreach (int id in productVM.SizeIds)
+            {
+                bool sizeResult = await _context.Sizes.AnyAsync(t => t.Id == id);
+                if (!sizeResult)
+                {
+                    productVM.Categories = await _context.Categories.ToListAsync();
+                    productVM.Tags = await _context.Tags.ToListAsync();
+                    productVM.Colors = await _context.Colors.ToListAsync();
+                    ModelState.AddModelError("SizeIds", "Bele size movcud deyil");
+                    return View(productVM);
+                }
+            }
+
+
 
             Product product = new()
             {
@@ -51,8 +110,36 @@ namespace ProniaTask.Areas.ProniaAdmin.Controllers
                 Price = productVM.Price,
                 SKU = productVM.SKU,
                 CategoryId = (int)productVM.CategoryId,
-                Description = productVM.Description
+                Description = productVM.Description,
+                ProductTags = new(),
             };
+            foreach (int id in productVM.TagIds)
+            {
+                var pTag = new ProductTag
+                {
+                    TagId = id,
+                    Product = product
+                };
+                product.ProductTags.Add(pTag);
+            }
+            foreach (int id in productVM.ColorIds)
+            {
+                var pColor = new ProductColor
+                {
+                    ColorId = id,
+                    Product = product
+                };
+                product.ProductColors.Add(pColor);
+            }
+            foreach (int id in productVM.SizeIds)
+            {
+                var pSize = new ProductSize
+                {
+                    SizeId = id,
+                    Product = product
+                };
+                product.ProductSizes.Add(pSize);
+            }
 
             await _context.Products.AddAsync(product);
             await _context.SaveChangesAsync();
@@ -89,7 +176,11 @@ namespace ProniaTask.Areas.ProniaAdmin.Controllers
         {
             if (id <= 0) return BadRequest();
 
-            Product product = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
+            Product product = await _context.Products
+                .Include(p => p.ProductTags)
+                .Include(p => p.ProductColors)
+                .Include(p => p.ProductSizes)
+                .FirstOrDefaultAsync(p => p.Id == id);
             if (product is null) return NotFound();
 
             UpdateProductVM productVM = new()
@@ -99,7 +190,13 @@ namespace ProniaTask.Areas.ProniaAdmin.Controllers
                 Price = product.Price,
                 SKU = product.SKU,
                 CategoryId = product.CategoryId,
-                Categories = await _context.Categories.ToListAsync()
+                TagIds = product.ProductTags.Select(pt => pt.TagId).ToList(),
+                ColorIds = product.ProductColors.Select(pc => pc.ColorId).ToList(),
+                SizeIds = product.ProductSizes.Select(ps => ps.SizeId).ToList(),
+                Categories = await _context.Categories.ToListAsync(),
+                Tags = await _context.Tags.ToListAsync(),
+                Colors = await _context.Colors.ToListAsync(),
+                Sizes = await _context.Sizes.ToListAsync(),
             };
             return View(productVM);
         }
@@ -110,18 +207,95 @@ namespace ProniaTask.Areas.ProniaAdmin.Controllers
             if (!ModelState.IsValid)
             {
                 productVM.Categories = await _context.Categories.ToListAsync();
-                return View();
+                productVM.Tags = await _context.Tags.ToListAsync();
+                productVM.Colors = await _context.Colors.ToListAsync();
+                productVM.Sizes = await _context.Sizes.ToListAsync();
+                return View(productVM);
             }
-            Product existed = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
+            Product existed = await _context.Products
+                .Include(p => p.ProductTags)
+                .Include(p => p.ProductColors)
+                .Include(p => p.ProductSizes)
+                .FirstOrDefaultAsync(p => p.Id == id);
             if (existed is null) return NotFound();
 
 
-            bool result = await _context.Products.AnyAsync(c=>c.Id==productVM.CategoryId);
+            bool result = await _context.Categories.AnyAsync(c=>c.Id==productVM.CategoryId);
             if (!result)
             {
                 productVM.Categories = await _context.Categories.ToListAsync();
-                return View();
+                productVM.Tags = await _context.Tags.ToListAsync();
+                productVM.Colors = await _context.Colors.ToListAsync();
+                productVM.Sizes = await _context.Sizes.ToListAsync();
+                return View(productVM);
             }
+
+            foreach (int idT in productVM.TagIds)
+            {
+                bool TagResult = await _context.Tags.AnyAsync(t => t.Id == idT);
+                if (!TagResult)
+                {
+                    productVM.Categories = await _context.Categories.ToListAsync();
+                    productVM.Tags = await _context.Tags.ToListAsync();
+                    productVM.Colors = await _context.Colors.ToListAsync();
+                    productVM.Sizes = await _context.Sizes.ToListAsync();
+                    ModelState.AddModelError("TagIds", "bele tag yoxdur");
+                    return View(productVM);
+                }
+            }
+            foreach (int idC in productVM.ColorIds)
+            {
+                bool colorResult = await _context.Colors.AnyAsync(t => t.Id == idC);
+                if (!colorResult)
+                {
+                    productVM.Categories = await _context.Categories.ToListAsync();
+                    productVM.Tags = await _context.Tags.ToListAsync();
+                    productVM.Colors = await _context.Colors.ToListAsync();
+                    productVM.Sizes = await _context.Sizes.ToListAsync();
+                    ModelState.AddModelError("ColorIds", "Bele reng movcud deyil");
+                    return View(productVM);
+                }
+            }
+            foreach (int idS in productVM.SizeIds)
+            {
+                bool sizeResult = await _context.Sizes.AnyAsync(t => t.Id == idS);
+                if (!sizeResult)
+                {
+                    productVM.Categories = await _context.Categories.ToListAsync();
+                    productVM.Tags = await _context.Tags.ToListAsync();
+                    productVM.Colors = await _context.Colors.ToListAsync();
+                    productVM.Sizes = await _context.Sizes.ToListAsync();
+                    ModelState.AddModelError("SizeIds", "Bele size yoxdur");
+                    return View(productVM);
+                }
+            }
+
+
+            result = _context.Products.Any(c => c.Name == productVM.Name && c.Id != id);
+            if (result)
+            {
+                productVM.Categories = await _context.Categories.ToListAsync();
+                productVM.Tags = await _context.Tags.ToListAsync();
+                productVM.Colors = await _context.Colors.ToListAsync();
+                productVM.Sizes = await _context.Sizes.ToListAsync();
+                ModelState.AddModelError("Name", "Bele product movcuddur");
+                return View(productVM);
+            }
+
+            existed.ProductTags.RemoveAll(pTag => !productVM.TagIds.Contains(pTag.Id));
+
+            existed.ProductTags.AddRange(productVM.TagIds.Where(tagId => !existed.ProductTags.Any(pt => pt.Id == tagId))
+                                 .Select(tagId => new ProductTag { TagId = tagId }));
+
+            existed.ProductColors.RemoveAll(pColor => !productVM.ColorIds.Contains(pColor.Id));
+
+            existed.ProductColors.AddRange(productVM.ColorIds.Where(colorId => !existed.ProductColors.Any(pt => pt.Id == colorId))
+                                 .Select(colorId => new ProductColor { ColorId = colorId }));
+
+            existed.ProductSizes.RemoveAll(pSize => !productVM.SizeIds.Contains(pSize.Id));
+
+            existed.ProductSizes.AddRange(productVM.SizeIds.Where(sizeId => !existed.ProductSizes.Any(pt => pt.Id == sizeId))
+                                 .Select(sizeId => new ProductSize { SizeId = sizeId }));
 
 
             existed.Name = productVM.Name;
@@ -132,7 +306,7 @@ namespace ProniaTask.Areas.ProniaAdmin.Controllers
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-            
+
         }
     }
 }
