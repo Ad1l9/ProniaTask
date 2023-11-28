@@ -84,5 +84,55 @@ namespace ProniaTask.Areas.ProniaAdmin.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+
+        public async Task<IActionResult> Update(int id)
+        {
+            if (id <= 0) return BadRequest();
+
+            Product product = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
+            if (product is null) return NotFound();
+
+            UpdateProductVM productVM = new()
+            {
+                Name = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                SKU = product.SKU,
+                CategoryId = product.CategoryId,
+                Categories = await _context.Categories.ToListAsync()
+            };
+            return View(productVM);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Update(int id, UpdateProductVM productVM)
+        {
+            if (!ModelState.IsValid)
+            {
+                productVM.Categories = await _context.Categories.ToListAsync();
+                return View();
+            }
+            Product existed = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
+            if (existed is null) return NotFound();
+
+
+            bool result = await _context.Products.AnyAsync(c=>c.Id==productVM.CategoryId);
+            if (!result)
+            {
+                productVM.Categories = await _context.Categories.ToListAsync();
+                return View();
+            }
+
+
+            existed.Name = productVM.Name;
+            existed.Description = productVM.Description;
+            existed.Price = productVM.Price;
+            existed.SKU = productVM.SKU;
+            existed.CategoryId = productVM.CategoryId;
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+            
+        }
     }
 }

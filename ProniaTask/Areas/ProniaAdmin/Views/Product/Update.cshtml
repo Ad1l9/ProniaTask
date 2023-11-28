@@ -1,4 +1,4 @@
-﻿@model CreateProductVM
+﻿@model UpdateProductVM
 
 <div class="content-wrapper">
 	<div class="row">
@@ -29,7 +29,7 @@
 						<div class="form-group">
 							<label asp-for="CategoryId">Category</label>
 							<select asp-for="CategoryId" asp-items="new SelectList(Model.Categories,nameof(Category.Id),nameof(Category.Name))" class="form-control">
-								<option selected disabled>Choose Categories</option>
+
 							</select>
 							<span class="text-danger" asp-validation-for="CategoryId"></span>
 						</div>
