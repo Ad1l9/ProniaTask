@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Pronia.Utilities.Extentions;
 using ProniaTask.Areas.ProniaAdmin.ViewModels;
 using ProniaTask.DAL;
 using ProniaTask.Models;
@@ -10,9 +11,12 @@ namespace ProniaTask.Areas.ProniaAdmin.Controllers
     public class ProductController : Controller
     {
         private readonly AppDbContext _context;
-        public ProductController(AppDbContext context)
+        private readonly IWebHostEnvironment _env;
+
+        public ProductController(AppDbContext context, IWebHostEnvironment env)
         {
             _context = context;
+            _env = env;
         }
         public async Task<IActionResult> Index()
         {
@@ -64,6 +68,9 @@ namespace ProniaTask.Areas.ProniaAdmin.Controllers
                 return View(productVM);
             }
 
+
+
+            
             foreach (int id in productVM.TagIds)
             {
                 bool TagResult = await _context.Tags.AnyAsync(t => t.Id == id);
@@ -103,6 +110,58 @@ namespace ProniaTask.Areas.ProniaAdmin.Controllers
             }
 
 
+            
+            if (!productVM.MainPhoto.ValidateType("image/"))
+            {
+                productVM.Categories = await _context.Categories.ToListAsync();
+                productVM.Tags = await _context.Tags.ToListAsync();
+                productVM.Colors = await _context.Colors.ToListAsync();
+                ModelState.AddModelError("MainPhoto", "File tipi uygun deyil");
+                return View();
+            }
+            if (!productVM.MainPhoto.ValidateSize(600))
+            {
+                productVM.Categories = await _context.Categories.ToListAsync();
+                productVM.Tags = await _context.Tags.ToListAsync();
+                productVM.Colors = await _context.Colors.ToListAsync();
+                ModelState.AddModelError("MainPhoto", "File olcusu uygun deyil");
+                return View();
+            }
+
+
+            if (!productVM.HoverPhoto.ValidateType("image/"))
+            {
+                productVM.Categories = await _context.Categories.ToListAsync();
+                productVM.Tags = await _context.Tags.ToListAsync();
+                productVM.Colors = await _context.Colors.ToListAsync();
+                ModelState.AddModelError("HoverPhoto", "File tipi uygun deyil");
+                return View();
+            }
+            if (!productVM.HoverPhoto.ValidateSize(600))
+            {
+                productVM.Categories = await _context.Categories.ToListAsync();
+                productVM.Tags = await _context.Tags.ToListAsync();
+                productVM.Colors = await _context.Colors.ToListAsync();
+                ModelState.AddModelError("HoverPhoto", "File olcusu uygun deyil");
+                return View();
+            }
+
+
+            ProductImage mainImage = new()
+            {
+                Alternative=productVM.Name,
+                IsPrimary = true,
+                ImageURL =await productVM.MainPhoto.CreateFile(_env.WebRootPath, "assets", "images", "website-images"),
+            };
+            ProductImage hoverImage = new()
+            {
+                Alternative = productVM.Name,
+                IsPrimary = false,
+                ImageURL = await productVM.HoverPhoto.CreateFile(_env.WebRootPath, "assets", "images", "website-images"),
+            };
+
+
+
 
             Product product = new()
             {
@@ -112,6 +171,9 @@ namespace ProniaTask.Areas.ProniaAdmin.Controllers
                 CategoryId = (int)productVM.CategoryId,
                 Description = productVM.Description,
                 ProductTags = new(),
+                ProductColors=new(),
+                ProductSizes=new(),
+                ProductImages = new List<ProductImage> { mainImage,hoverImage},
             };
             foreach (int id in productVM.TagIds)
             {
@@ -139,6 +201,28 @@ namespace ProniaTask.Areas.ProniaAdmin.Controllers
                     Product = product
                 };
                 product.ProductSizes.Add(pSize);
+            }
+
+
+            TempData["Message"] = "";
+            foreach (IFormFile image in productVM.Photos)
+            {
+                if (!image.ValidateType("image/"))
+                {
+                    TempData["Message"] += $"<p class=\"text-danger\">{image.FileName} file tipi uygun deyil</p>";
+                    continue;
+                }
+                if (!image.ValidateSize(600))
+                {
+                    TempData["Message"] += $"<p class=\"text-danger\">{image.FileName} file olcusu uygun deyil</p>";
+                    continue;
+                }
+                product.ProductImages.Add(new ProductImage
+                {
+                    ImageURL = await productVM.HoverPhoto.CreateFile(_env.WebRootPath, "assets", "images", "website-images"),
+                    IsPrimary = null,
+                    Alternative = productVM.Name
+                });
             }
 
             await _context.Products.AddAsync(product);
@@ -229,6 +313,8 @@ namespace ProniaTask.Areas.ProniaAdmin.Controllers
                 productVM.Sizes = await _context.Sizes.ToListAsync();
                 return View(productVM);
             }
+
+
 
             foreach (int idT in productVM.TagIds)
             {
