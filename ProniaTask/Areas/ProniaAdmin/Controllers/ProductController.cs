@@ -246,17 +246,21 @@ namespace ProniaTask.Areas.ProniaAdmin.Controllers
         }
 
 
-        public async Task<IActionResult> Delete(int id)
-        {
-            if (id <= 0) return BadRequest();
-            var deleted = await _context.Products.FirstOrDefaultAsync(c => c.Id == id);
-            if (deleted is null) return NotFound();
-            _context.Products.Remove(deleted);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
+		public async Task<IActionResult> Delete(int id)
+		{
+			if (id <= 0) return BadRequest();
+			var existed = await _context.Products.Include(p => p.ProductImages).FirstOrDefaultAsync(c => c.Id == id);
+			if (existed is null) return NotFound();
+			foreach (ProductImage image in existed.ProductImages)
+			{
+				image.ImageURL.DeleteFile(_env.WebRootPath, "assets", "images", "website-images");
+			}
+			_context.Products.Remove(existed);
+			await _context.SaveChangesAsync();
+			return RedirectToAction(nameof(Index));
+		}
 
-        public async Task<IActionResult> Update(int id)
+		public async Task<IActionResult> Update(int id)
         {
             if (id <= 0) return BadRequest();
 
@@ -320,6 +324,53 @@ namespace ProniaTask.Areas.ProniaAdmin.Controllers
                 productVM.Sizes = await _context.Sizes.ToListAsync();
                 return View(productVM);
             }
+
+
+
+			
+
+
+
+			foreach (int idT in productVM.TagIds)
+            {
+                bool TagResult = await _context.Tags.AnyAsync(t => t.Id == idT);
+                if (!TagResult)
+                {
+                    productVM.Categories = await _context.Categories.ToListAsync();
+                    productVM.Tags = await _context.Tags.ToListAsync();
+                    productVM.Colors = await _context.Colors.ToListAsync();
+                    productVM.Sizes = await _context.Sizes.ToListAsync();
+                    ModelState.AddModelError("TagIds", "bele tag yoxdur");
+                    return View(productVM);
+                }
+            }
+            foreach (int idC in productVM.ColorIds)
+            {
+                bool colorResult = await _context.Colors.AnyAsync(t => t.Id == idC);
+                if (!colorResult)
+                {
+                    productVM.Categories = await _context.Categories.ToListAsync();
+                    productVM.Tags = await _context.Tags.ToListAsync();
+                    productVM.Colors = await _context.Colors.ToListAsync();
+                    productVM.Sizes = await _context.Sizes.ToListAsync();
+                    ModelState.AddModelError("ColorIds", "Bele reng movcud deyil");
+                    return View(productVM);
+                }
+            }
+            foreach (int idS in productVM.SizeIds)
+            {
+                bool sizeResult = await _context.Sizes.AnyAsync(t => t.Id == idS);
+                if (!sizeResult)
+                {
+                    productVM.Categories = await _context.Categories.ToListAsync();
+                    productVM.Tags = await _context.Tags.ToListAsync();
+                    productVM.Colors = await _context.Colors.ToListAsync();
+                    productVM.Sizes = await _context.Sizes.ToListAsync();
+                    ModelState.AddModelError("SizeIds", "Bele size yoxdur");
+                    return View(productVM);
+                }
+            }
+
 
 
 
@@ -405,48 +456,8 @@ namespace ProniaTask.Areas.ProniaAdmin.Controllers
 
 
 
-			foreach (int idT in productVM.TagIds)
-            {
-                bool TagResult = await _context.Tags.AnyAsync(t => t.Id == idT);
-                if (!TagResult)
-                {
-                    productVM.Categories = await _context.Categories.ToListAsync();
-                    productVM.Tags = await _context.Tags.ToListAsync();
-                    productVM.Colors = await _context.Colors.ToListAsync();
-                    productVM.Sizes = await _context.Sizes.ToListAsync();
-                    ModelState.AddModelError("TagIds", "bele tag yoxdur");
-                    return View(productVM);
-                }
-            }
-            foreach (int idC in productVM.ColorIds)
-            {
-                bool colorResult = await _context.Colors.AnyAsync(t => t.Id == idC);
-                if (!colorResult)
-                {
-                    productVM.Categories = await _context.Categories.ToListAsync();
-                    productVM.Tags = await _context.Tags.ToListAsync();
-                    productVM.Colors = await _context.Colors.ToListAsync();
-                    productVM.Sizes = await _context.Sizes.ToListAsync();
-                    ModelState.AddModelError("ColorIds", "Bele reng movcud deyil");
-                    return View(productVM);
-                }
-            }
-            foreach (int idS in productVM.SizeIds)
-            {
-                bool sizeResult = await _context.Sizes.AnyAsync(t => t.Id == idS);
-                if (!sizeResult)
-                {
-                    productVM.Categories = await _context.Categories.ToListAsync();
-                    productVM.Tags = await _context.Tags.ToListAsync();
-                    productVM.Colors = await _context.Colors.ToListAsync();
-                    productVM.Sizes = await _context.Sizes.ToListAsync();
-                    ModelState.AddModelError("SizeIds", "Bele size yoxdur");
-                    return View(productVM);
-                }
-            }
 
-
-            result = _context.Products.Any(c => c.Name == productVM.Name && c.Id != id);
+			result = _context.Products.Any(c => c.Name == productVM.Name && c.Id != id);
             if (result)
             {
                 productVM.Categories = await _context.Categories.ToListAsync();
@@ -473,7 +484,33 @@ namespace ProniaTask.Areas.ProniaAdmin.Controllers
                                  .Select(sizeId => new ProductSize { SizeId = sizeId }));
 
 
-            existed.Name = productVM.Name;
+			TempData["Message"] = "";
+			if (productVM.Photos is not null)
+			{
+				foreach (IFormFile photo in productVM.Photos)
+				{
+					if (!photo.ValidateType())
+					{
+						TempData["Message"] += $"<p class=\"text-danger\">{photo.FileName} file type wrong</p>";
+						continue;
+					}
+					if (!photo.ValidateSize(600))
+					{
+						TempData["Message"] += $"<p class=\"text-danger\">{photo.FileName} file size wrong</p>";
+						continue;
+					}
+
+					existed.ProductImages.Add(new ProductImage
+					{
+						Alternative = productVM.Name,
+						IsPrimary = null,
+						ImageURL = await photo.CreateFile(_env.WebRootPath, "assets", "images", "website-images")
+					});
+				}
+			}
+
+
+			existed.Name = productVM.Name;
             existed.Description = productVM.Description;
             existed.Price = productVM.Price;
             existed.SKU = productVM.SKU;
