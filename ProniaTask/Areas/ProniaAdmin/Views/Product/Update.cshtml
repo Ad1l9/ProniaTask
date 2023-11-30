@@ -1,4 +1,8 @@
 ﻿@model UpdateProductVM
+@{
+	ProductImage main = Model.ProductImages.FirstOrDefault(pi => pi.IsPrimary == true);
+	ProductImage hover = Model.ProductImages.FirstOrDefault(pi => pi.IsPrimary == false);
+}
 
 <div class="content-wrapper">
 	<div class="row">
@@ -6,6 +10,43 @@
 			<div class="card">
 				<div class="card-body">
 					<form class="forms-sample" method="post" enctype="multipart/form-data">
+						<div class="form-group">
+							<img style="width:170px;height:170px" src="~/assets/images/website-images/@main.ImageURL" />
+
+							<div class="form-group">
+								<label asp-for="MainPhoto">Main Image</label>
+								<input accept="image/*" asp-for="MainPhoto" class="form-control" id="MainPhoto">
+								<span class="text-danger" asp-validation-for="MainPhoto"></span>
+							</div>
+							<span class="text-danger" asp-validation-for="MainPhoto"></span>
+						</div>
+						<div class="form-group">
+							<img style="width:170px;height:170px" src="~/assets/images/website-images/@hover.ImageURL" />
+
+
+							<div class="form-group">
+								<label asp-for="HoverPhoto">Hover Image</label>
+								<input accept="image/*" asp-for="HoverPhoto" class="form-control" id="HoverPhoto">
+								<span class="text-danger" asp-validation-for="HoverPhoto"></span>
+							</div>
+							<span class="text-danger" asp-validation-for="HoverPhoto"></span>
+						</div>
+
+						<div class="form-group d-flex justify-content-around">
+							@foreach (ProductImage productImage in Model.ProductImages.Where(pi=>pi.IsPrimary==null))
+							{
+								<div>
+									<img style="width:170px;height:170px" src="~/assets/images/website-images/@productImage.ImageURL" />
+									<button style="width:50px; border-radius:50%; right:0;" class="cus-delete btn btn-danger position-absolute text-center"><i style="margin-left:-10px;" class="mdi mdi-delete"></i></button>
+									<input asp-for="ImageIds" type="hidden" value="@productImage.Id">
+								</div>
+							}
+							<div class="form-group">
+								<label asp-for="Photos">Additional Image</label>
+								<input accept="image/*" multiple asp-for="Photos" class="form-control" id="Photos">
+								<span class="text-danger" asp-validation-for="Photos"></span>
+							</div>
+						</div>
 						<div class="form-group">
 							<label asp-for="Name">Name</label>
 							<input asp-for="Name" class="form-control" id="Name" placeholder="Name">
@@ -65,3 +106,16 @@
 		</div>
 	</div>
 </div>
+
+
+@section DeleteImages{
+	<script>
+		var btns = document.querySelectorAll(".cus-delete")
+		for (let i = 0; i <= btns.length; i++) {
+			btns[i].addEventListener("click", function () {
+				btns[i].parentElement.remove()
+			})
+		}
+
+	</script>
+}
