@@ -19,6 +19,9 @@
   <ItemGroup>
     <Folder Include="Areas\ProniaAdmin\Data\" />
     <Folder Include="Areas\ProniaAdmin\Models\" />
+    <Folder Include="Views\Shared\Components\Footer\" />
+    <Folder Include="Views\Shared\Components\Header\" />
+    <Folder Include="Views\Shared\Components\Product\" />
   </ItemGroup>
 
 </Project>

@@ -17,6 +17,7 @@ namespace ProniaTask.DAL
         public DbSet<ProductSize> ProductSizes { get; set; }
 
         public DbSet<Slide> Slides { get; set; }
+        public DbSet<Setting> Settings { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options):base(options)
         {
