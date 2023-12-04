@@ -41,7 +41,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="cart.html"
+                                <a asp-action="AddBasket" asp-route-id="@product.Id" asp-controller="Basket" asp-route-controllername="Home"
                                    data-tippy="Add to cart"
                                    data-tippy-inertia="true"
                                    data-tippy-animation="shift-away"
@@ -57,7 +57,7 @@
                 <div class="product-content">
                     <a class="product-name" asp-controller="Product" asp-action="Detail" asp-route-id="@product.Id">@product.Name</a>
                     <div class="price-box pb-1">
-                        <span class="new-price">$@String.Format("{0:0.00}", product.Price)</span>
+                        <span class="new-price">@product.Price</span>
                     </div>
                     <div class="rating-box">
                         <ul>

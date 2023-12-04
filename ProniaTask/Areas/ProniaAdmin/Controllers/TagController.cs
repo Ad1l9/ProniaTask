@@ -66,9 +66,16 @@ namespace ProniaTask.Areas.ProniaAdmin.Controllers
 
             Tag tag = await _context.Tags.FirstOrDefaultAsync(t => t.Id == id);
 
+            UpdateTagVM vm = new()
+            {
+                Name = tag.Name
+            };
+
+            
+
             if (tag is null) return NotFound();
 
-            return View(tag);
+            return View(vm);
         }
         [HttpPost]
         public async Task<IActionResult> Update(int id, UpdateTagVM tagVM)
