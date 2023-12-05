@@ -1,10 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer;
 using ProniaTask.Models;
 
 namespace ProniaTask.DAL
 {
-    public class AppDbContext:DbContext
+    public class AppDbContext:IdentityDbContext<IdentityUser>
     {
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
@@ -18,8 +20,9 @@ namespace ProniaTask.DAL
 
         public DbSet<Slide> Slides { get; set; }
         public DbSet<Setting> Settings { get; set; }
+        public DbSet<AppUser> AppUsers { get; set; }
 
-        public AppDbContext(DbContextOptions<AppDbContext> options):base(options)
+		public AppDbContext(DbContextOptions<AppDbContext> options):base(options)
         {
             
         }
