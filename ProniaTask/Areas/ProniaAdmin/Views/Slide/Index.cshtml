@@ -49,7 +49,12 @@
                                         </td>
                                         <td>
                                             <a asp-action="Update" asp-route-id="@slide.Id" class="btn btn-warning btn-info"> <i class="mdi mdi-pencil"></i> Update</a>
+                                            
+                                            @if (User.IsInRole("Admin"))
+                                            {
                                             <a asp-action="Delete" asp-route-id="@slide.Id" class="btn btn-danger btn-info"> <i class="mdi mdi-delete"></i> Delete</a>
+                                                
+                                            }
                                             <a asp-action="Details" asp-route-id="@slide.Id" class="btn btn-primary btn-info"> <i class="mdi mdi-open-in-new"></i> Details</a>
                                         </td>
                                     </tr>

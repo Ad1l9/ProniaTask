@@ -2,6 +2,7 @@
 @model HeaderVM
 
 
+
 @{
     decimal total = 0;
 }
@@ -91,12 +92,29 @@
                                             </button>
                                             <ul class="dropdown-menu"
                                                 aria-labelledby="settingButton">
+                                                
+                                                
+                                        
+                                        @if (User.Identity.IsAuthenticated)
+                                        {
+                                            if (!User.IsInRole("Member"))
+                                            {
                                                 <li>
-                                                    <a class="dropdown-item" href="my-account.html">My account</a>
+                                                    <a class="dropdown-item" asp-action="Index" asp-controller="Home" asp-area="ProniaAdmin">Admin Page</a>
                                                 </li>
-                                                <li>
-                                                    <a class="dropdown-item" href="login-register.html">Login | Register</a>
-                                                </li>
+                                            }
+                                            <li>
+                                                <a class="dropdown-item" asp-action="Logout" asp-controller="Account">Logout</a>
+                                            </li>
+                                        }
+                                        else{
+                                            <li>
+                                                <a class="dropdown-item" asp-action="Login" asp-controller="Account" asp-route-returnUrl="@Context.Request.Path.Value">Login</a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" asp-action="Register" asp-controller="Account">Register</a>
+                                            </li>
+                                        }
                                             </ul>
                                         </li>
                                         <li class="d-none d-lg-block">

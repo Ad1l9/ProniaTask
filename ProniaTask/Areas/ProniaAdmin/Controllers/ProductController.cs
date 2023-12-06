@@ -1,13 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Pronia.Utilities.Extentions;
 using ProniaTask.Areas.ProniaAdmin.ViewModels;
 using ProniaTask.DAL;
+using ProniaTask.Enumerations;
 using ProniaTask.Models;
 
 namespace ProniaTask.Areas.ProniaAdmin.Controllers
 {
     [Area("ProniaAdmin")]
+    
     public class ProductController : Controller
     {
         private readonly AppDbContext _context;
@@ -18,6 +21,7 @@ namespace ProniaTask.Areas.ProniaAdmin.Controllers
             _context = context;
             _env = env;
         }
+        [Authorize(Roles = "Admin,Moderator")]
         public async Task<IActionResult> Index()
         {
             List<Product> products = await _context.Products
@@ -30,7 +34,7 @@ namespace ProniaTask.Areas.ProniaAdmin.Controllers
             return View(products);
         }
 
-
+        [Authorize(Roles = "Admin,Moderator")]
         public async Task<IActionResult> Create()
         {
             var vm = new CreateProductVM
@@ -231,6 +235,7 @@ namespace ProniaTask.Areas.ProniaAdmin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [Authorize(Roles = "Admin,Moderator")]
         public async Task<IActionResult> Detail(int id)
         {
             if (id <= 0) return BadRequest();
@@ -245,8 +250,8 @@ namespace ProniaTask.Areas.ProniaAdmin.Controllers
             return View(product);
         }
 
-
-		public async Task<IActionResult> Delete(int id)
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Delete(int id)
 		{
 			if (id <= 0) return BadRequest();
 			var existed = await _context.Products.Include(p => p.ProductImages).FirstOrDefaultAsync(c => c.Id == id);
@@ -260,7 +265,8 @@ namespace ProniaTask.Areas.ProniaAdmin.Controllers
 			return RedirectToAction(nameof(Index));
 		}
 
-		public async Task<IActionResult> Update(int id)
+        [Authorize(Roles = "Admin,Moderator")]
+        public async Task<IActionResult> Update(int id)
         {
             if (id <= 0) return BadRequest();
 
