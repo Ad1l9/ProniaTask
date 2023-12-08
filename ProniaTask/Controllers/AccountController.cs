@@ -95,6 +95,15 @@ namespace ProniaTask.Controllers
 
 		public async Task<IActionResult> Logout()
         {
+
+            if (Request.Cookies["Basket"] != null)
+            {
+                foreach (var item in Request.Cookies.Keys)
+                {
+                    Response.Cookies.Delete(item);
+                }
+                
+            }
             await _signIn.SignOutAsync();
             return RedirectToAction("Index", "Home");
         }

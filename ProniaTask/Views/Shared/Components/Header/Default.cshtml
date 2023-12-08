@@ -802,7 +802,7 @@
                     {
                         total += item.SubTotal;
                         <li class="minicart-product">
-                            <a class="product-item_remove" href="#">
+                            <a class="product-item_remove" asp-controller="Basket" asp-action="RemoveBasket" asp-route-id="@item.Id">
                                 <i class="pe-7s-close"
                                    data-tippy="Remove"
                                    data-tippy-inertia="true"
@@ -838,7 +838,7 @@
                         <span class="ammount">$@total</span>
                     </div>
                     <div class="group-btn_wrap d-grid gap-2">
-                <a asp-action="AddBasket" asp-route-id="@Model.Basket" asp-controller="Basket" class="btn btn-dark">View Cart</a>
+                        <a asp-action="Index" asp-controller="Basket" class="btn btn-dark">View Cart</a>
                         <a href="checkout.html" class="btn btn-dark">Checkout</a>
                     </div>
                 </div>

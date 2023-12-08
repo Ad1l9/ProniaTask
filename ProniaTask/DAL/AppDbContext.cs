@@ -22,7 +22,10 @@ namespace ProniaTask.DAL
         public DbSet<Setting> Settings { get; set; }
         public DbSet<AppUser> AppUsers { get; set; }
 
-		public AppDbContext(DbContextOptions<AppDbContext> options):base(options)
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<BasketItem> BasketItems { get; set; }
+
+        public AppDbContext(DbContextOptions<AppDbContext> options):base(options)
         {
             
         }
