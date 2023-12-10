@@ -1,0 +1,35 @@
+﻿@using ProniaTask.ViewModel;
+@model List<BasketItemVM>
+@{
+    decimal total = 0;
+}
+
+<ul class="minicart-list">
+    @foreach (BasketItemVM item in Model)
+    {
+        total += item.SubTotal;
+        <li class="minicart-product">
+            <a class="product-item_remove" asp-controller="Basket" asp-action="RemoveBasket" asp-route-id="@item.Id">
+                <i class="pe-7s-close"
+                   data-tippy="Remove"
+                   data-tippy-inertia="true"
+                   data-tippy-animation="shift-away"
+                   data-tippy-delay="50"
+                   data-tippy-arrow="true"
+                   data-tippy-theme="sharpborder"></i>
+            </a>
+            <a asp-action="Detail" asp-controller="Product" asp-route-id="@item.Id"
+               class="product-item_img">
+                <img class="img-full"
+                     src="~/assets/images/website-images/@item.ImageUrl"
+                     alt="" />
+            </a>
+            <div class="product-item_content">
+                <a class="product-item_title"
+                   href="single-product-variable.html">@item.Name</a>
+                <span class="product-item_quantity">@item.Count x $@item.Price</span>
+            </div>
+        </li>
+    }
+</ul>
+

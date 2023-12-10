@@ -36,7 +36,7 @@ namespace Pronia.Utilities.Extentions
             return fileName;
         }
 
-        public static async void DeleteFile(this string fileName, string root, params string[] folders)
+        public static void DeleteFile(this string fileName, string root, params string[] folders)
         {
             string path = CreatePath(root, fileName, folders);
             if (File.Exists(path))

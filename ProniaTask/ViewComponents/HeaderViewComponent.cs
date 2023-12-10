@@ -36,7 +36,7 @@ namespace ProniaTask.ViewComponents
                     _accessor.HttpContext.Response.Cookies.Equals(null);
                 }
                 AppUser user = await _usermanager.Users
-                    .Include(u => u.BasketItems)
+                    .Include(u => u.BasketItems.Where(u => u.OrderId == null))
                     .ThenInclude(u => u.Product)
                     .ThenInclude(p => p.ProductImages.Where(pi => pi.IsPrimary == true))
                     .FirstOrDefaultAsync(u => u.Id == _accessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
@@ -45,7 +45,7 @@ namespace ProniaTask.ViewComponents
                 {
                     basketVM.Add(new()
                     {
-                        Id=item.Id,
+                        Id=item.ProductId,
                         Name = item.Product.Name,
                         Price = item.Product.Price,
                         ImageUrl = item.Product.ProductImages.FirstOrDefault().ImageURL,
