@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using ProniaTask.Areas.ProniaAdmin.ViewModels;
 using ProniaTask.DAL;
@@ -16,10 +17,18 @@ namespace ProniaTask.Areas.ProniaAdmin.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page)
         {
-            var Tags = await _context.Tags.Include(t => t.ProductTags).ToListAsync();
-            return View(Tags);
+            double count = await _context.Tags.CountAsync();
+            var Tags = await _context.Tags.Skip(page * 2).Take(2)
+                .Include(t => t.ProductTags).ToListAsync();
+            PaginationVM<Tag> pagination = new PaginationVM<Tag>()
+            {
+                CurrentPage = page,
+                TotalPage = Math.Ceiling(count / 2),
+                Items = Tags
+            };
+            return View(pagination);
         }
         public IActionResult Create()
         {
