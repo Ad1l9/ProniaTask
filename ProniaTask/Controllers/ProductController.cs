@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using ProniaTask.DAL;
 using ProniaTask.DetailViewModel;
 using ProniaTask.Models;
+using ProniaTask.Utilities.Exceptions;
 
 namespace ProniaTask.Controllers
 {
@@ -16,7 +17,7 @@ namespace ProniaTask.Controllers
         }
         public async Task<IActionResult> Detail(int id)
         {
-            if (id <= 0) return BadRequest();
+            if (id <= 0) throw new WrongRequestException("Gonderilen sorgu yanlisdir");
 
             Product product = await _context.Products
                 .Include(p => p.Category)
@@ -26,7 +27,7 @@ namespace ProniaTask.Controllers
                 .Include(p=>p.ProductSizes).ThenInclude(p=>p.Size)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
-            if (product is null) return NotFound();
+            if (product is null) throw new NotFoundException("Bele bir mehsul tapilmadi");
 
             List<Product> products = await _context.Products
                 .Include(p => p.Category)
@@ -37,6 +38,11 @@ namespace ProniaTask.Controllers
 
             DetailVM detailVM = new() { Product = product, RelatedProducts = products };
             return View(detailVM);
+        }
+
+        public IActionResult ErrorPage(string error = "Xeta bash verdi")
+        {
+            return View(model: error);
         }
     }
 }

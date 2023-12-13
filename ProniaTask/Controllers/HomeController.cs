@@ -31,5 +31,9 @@ namespace ProniaTask.Controllers
         {
             return View();
         }
+        public IActionResult ErrorPage(string error="Xeta bash verdi") 
+        {
+            return View(model:error);
+        }
     }
 }
