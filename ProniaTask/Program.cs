@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ProniaTask.DAL;
+using ProniaTask.Middlewares;
 using ProniaTask.Models;
 using ProniaTask.Services;
 
@@ -36,6 +37,7 @@ app.UseAuthorization();
 app.UseStaticFiles();
 
 
+app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 app.MapControllerRoute(
     "default",
     "{area:exists}/{controller=Home}/{action=Index}/{id?}"
